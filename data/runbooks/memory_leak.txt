@@ -1,0 +1,85 @@
+RUNBOOK: High Memory Usage / Memory Leak
+Category: Infrastructure / Operating System
+Severity Threshold: > 85% physical RAM utilisation sustained for > 5 minutes
+========================================================================
+
+ABSTRACT
+--------
+This Standard Operating Procedure (SOP) provides systematic remediation steps
+for hosts exhibiting abnormally high memory utilisation or symptoms of a
+memory leak in a running process. The goal is to restore normal service
+operation with minimal downtime.
+
+SYMPTOMS
+--------
+- vm.memory.utilization metric exceeds 85% threshold.
+- OOM (Out-Of-Memory) Killer events visible in /var/log/kern.log or dmesg.
+- Application response times degrade significantly (latency spikes).
+- Swap utilisation increases rapidly.
+- Top process table shows one or more processes with monotonically increasing RSS.
+
+IMMEDIATE TRIAGE STEPS
+-----------------------
+1. Identify the top memory-consuming processes:
+   $ top -b -n 1 -o %MEM | head -20
+   $ ps aux --sort=-%mem | head -10
+
+2. Check current memory utilisation in detail:
+   $ free -h
+   $ vmstat -s | grep -i mem
+
+3. Inspect OOM Killer history:
+   $ dmesg | grep -i "oom\|killed process"
+   $ grep -i "oom\|killed" /var/log/kern.log | tail -20
+
+4. Identify the suspected leaking process by PID:
+   $ cat /proc/<PID>/status | grep -i vmrss
+   $ pmap -x <PID> | tail -1
+
+ROOT CAUSE IDENTIFICATION
+--------------------------
+- Compare process RSS at T0 and T0+5min to confirm monotonic growth.
+- Cross-reference with recent application deployments or configuration changes.
+- Check for unclosed file descriptors: $ lsof -p <PID> | wc -l
+- Inspect heap allocator statistics if the process exposes a management API.
+
+REMEDIATION STEPS (ORDERED BY RISK)
+-------------------------------------
+Step 1 (LOW RISK): Graceful service restart
+  $ sudo systemctl restart <service_name>
+  Ansible: ansible-playbook -i inventory/production memory_leak.yml -e "target=<hostname> action=restart"
+
+Step 2 (LOW RISK): Clear OS-level page cache if memory is held by OS buffers
+  $ sudo sync && echo 3 | sudo tee /proc/sys/vm/drop_caches
+
+Step 3 (MEDIUM RISK): Force-kill the leaking process if graceful restart fails
+  $ sudo kill -9 <PID>
+  Monitor recovery: $ watch -n 2 free -h
+
+Step 4 (MEDIUM RISK): Reduce JVM heap if the process is a Java application
+  Edit /etc/default/<service>: add -Xmx4g -XX:+UseG1GC flags.
+  $ sudo systemctl daemon-reload && sudo systemctl restart <service_name>
+
+Step 5 (HIGH RISK): Emergency system reboot if memory pressure causes kernel instability
+  Notify on-call lead before executing.
+  $ sudo shutdown -r +1 "Emergency reboot due to memory exhaustion — notified via Telegram HITL"
+
+POST-REMEDIATION VERIFICATION
+-------------------------------
+- Confirm memory utilisation drops below 70%: $ free -h
+- Verify service is healthy: $ systemctl status <service_name>
+- Check application logs for restart confirmation.
+- Set a Zabbix maintenance window if further analysis is needed.
+- Open a post-mortem ticket with heap dump or memory profiling results.
+
+ESCALATION PATH
+----------------
+- If steps 1–3 fail after two attempts, escalate to the Backend Engineering on-call.
+- If host is part of a cluster, drain it from the load balancer first.
+- Contact: ops-oncall@company.internal | PagerDuty: P1 Memory Escalation Policy.
+
+ROLLBACK
+--------
+- Restart: No rollback needed; previous state was abnormal.
+- Heap tuning: Revert /etc/default/<service> to previous JVM flags and restart.
+- Reboot: Validate all dependent services start on reboot via runlevel checks.

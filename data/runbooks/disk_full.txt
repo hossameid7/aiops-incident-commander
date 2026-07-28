@@ -1,0 +1,101 @@
+RUNBOOK: Partition / Disk Full
+Category: Infrastructure / Storage
+Severity Threshold: Disk utilisation >= 90% on any production partition
+========================================================================
+
+ABSTRACT
+--------
+This Standard Operating Procedure (SOP) covers identification and resolution
+of critically full disk partitions on production Linux hosts. A full disk
+causes service crashes, data corruption, and cascading failures across
+dependent services. Immediate action is required.
+
+SYMPTOMS
+--------
+- vfs.fs.size[/,pused] metric exceeds 90% threshold.
+- Application logs contain: "No space left on device" (errno ENOSPC).
+- Database services (MySQL, PostgreSQL, MongoDB) fail to write WAL/redo logs.
+- Cron jobs and log rotation fail silently.
+- SSH sessions may be terminated due to inability to write temporary files.
+
+IMMEDIATE TRIAGE STEPS
+-----------------------
+1. Identify the full partition and current utilisation:
+   $ df -hT
+   $ df -i  # Check inode exhaustion — can mimic a full disk
+
+2. Find the top space-consuming directories:
+   $ sudo du -ahx / | sort -rh | head -30
+   $ sudo du -sh /var/log /tmp /home /opt /data
+
+3. Check for deleted-but-open file handles (common with log files):
+   $ sudo lsof +L1 | grep -E "REG.*deleted"
+   # Files in this list are consuming space until the process closes them.
+
+4. Identify log rotation status:
+   $ sudo logrotate --debug /etc/logrotate.conf
+   $ ls -lh /var/log/*.log | sort -k5 -rh | head -10
+
+ROOT CAUSE IDENTIFICATION
+--------------------------
+- Runaway log production: Check for misconfigured log levels (DEBUG in production).
+- Database WAL accumulation: Confirm replication slots are not stalled.
+- Core dumps: $ find / -name "core.*" -size +100M 2>/dev/null
+- Application temp files not cleaned: $ ls -lh /tmp | sort -k5 -rh | head -10
+- Inode exhaustion from millions of small files: $ df -i
+
+REMEDIATION STEPS (ORDERED BY RISK)
+-------------------------------------
+Step 1 (LOW RISK): Remove rotated compressed log archives
+  $ sudo find /var/log -name "*.gz" -mtime +7 -delete
+  $ sudo find /var/log -name "*.log.*" -mtime +3 -delete
+  Ansible: ansible-playbook -i inventory/production disk_full.yml -e "target=<hostname> action=clean_logs"
+
+Step 2 (LOW RISK): Clear systemd journal logs older than 3 days
+  $ sudo journalctl --vacuum-time=3d
+  $ sudo journalctl --vacuum-size=500M
+
+Step 3 (LOW RISK): Clear package manager cache
+  $ sudo apt-get clean       # Debian/Ubuntu
+  $ sudo yum clean all       # RHEL/CentOS
+  $ sudo dnf clean all       # Fedora/RHEL 8+
+
+Step 4 (MEDIUM RISK): Truncate an actively-written log file for a running service
+  WARNING: Confirm with the application team before truncating.
+  $ sudo truncate -s 0 /var/log/<application>/<app>.log
+  $ sudo systemctl restart rsyslog
+
+Step 5 (MEDIUM RISK): Restart the process holding deleted file descriptors
+  # Identify PID from lsof output (Step 3 of triage), then:
+  $ sudo systemctl restart <service_name>
+  # Space is reclaimed immediately after the process closes the file handle.
+
+Step 6 (MEDIUM RISK): Move /tmp contents to a separate mount or symlink
+  $ sudo mv /tmp /tmp_backup && sudo mkdir /tmp && sudo chmod 1777 /tmp
+  # Ensure tmpfs is configured in /etc/fstab for long-term fix.
+
+Step 7 (HIGH RISK): Expand the partition or add additional storage
+  Requires a change request and cloud/infrastructure team involvement.
+  AWS EBS: $ aws ec2 modify-volume --volume-id vol-xxxxx --size <new_size_GiB>
+  Then resize the filesystem: $ sudo resize2fs /dev/xvdf
+
+POST-REMEDIATION VERIFICATION
+-------------------------------
+- Confirm partition utilisation drops below 75%: $ df -hT
+- Verify services are operational: $ systemctl status <service_name>
+- Confirm application can write logs: $ sudo touch /var/log/test_write && rm $_
+- Review and fix log rotation configuration if it was the root cause.
+- Open a capacity planning ticket if partition is regularly approaching 80%.
+
+ESCALATION PATH
+----------------
+- If cleanup is insufficient and disk remains above 85%, escalate to the
+  Infrastructure team for emergency volume expansion.
+- Notify Database team if WAL files are the primary consumer.
+- Contact: infra-oncall@company.internal | Slack: #ops-incidents
+
+ROLLBACK
+--------
+- Log deletion: Logs are not recoverable. Verify no compliance requirements mandate retention.
+- Partition expansion: No rollback needed; expansions are additive and non-destructive.
+- Tmpfs change: Revert /etc/fstab entry and remount.
