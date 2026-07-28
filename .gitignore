@@ -1,0 +1,55 @@
+# Environment variables - NEVER commit real credentials
+.env
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+*.whl
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+.env.bak
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+*.log
+
+# ChromaDB persistent storage
+chroma_db/
+
+# IDE configurations
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Ansible sensitive files
+*.retry
+playbooks/group_vars/all/vault.yml
+
+# Jupyter Notebooks checkpoints
+.ipynb_checkpoints/
+
+# Typing stubs
+*.pyi
