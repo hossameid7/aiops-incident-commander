@@ -448,15 +448,9 @@ aiops-incident-commander/
 ## Author Information
 
 **Author:** Hossam Eid
-
 **Position:** Data Scientist / ML and AIOps Engineer
-
-**Phone / WhatsApp:** +7 927 247-89-20
-
 **Telegram:** @hossameid7
-
 **Portfolio:** https://hossameid7.github.io/itportfolio/
-
 **GitHub:** https://github.com/hossameid7
 
 ---
