@@ -447,11 +447,7 @@ aiops-incident-commander/
 
 ## Author Information
 
-**Author:** Hossam Eid
-**Position:** Data Scientist / ML and AIOps Engineer
-**Telegram:** @hossameid7
-**Portfolio:** https://hossameid7.github.io/itportfolio/
-**GitHub:** https://github.com/hossameid7
+Hossam Eid | [github.com/hossameid7](https://github.com/hossameid7) | Telegram: [@hossameid7](https://t.me/hossameid7)
 
 ---
 
