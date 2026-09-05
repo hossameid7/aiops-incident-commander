@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 320" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #0d1117; }
+      .card { fill: #161b22; stroke: #30363d; stroke-width: 1.5px; rx: 10px; }
+      .card-hover { transition: all 0.3s ease; }
+      .title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 15px; font-weight: 600; fill: #f0f6fc; }
+      .subtitle { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 12px; fill: #8b949e; }
+      .tag { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 10px; font-weight: 600; text-anchor: middle; }
+      .arrow { stroke: #58a6ff; stroke-width: 2; fill: none; stroke-dasharray: 4,4; }
+      .arrow-solid { stroke: #388bfd; stroke-width: 2; fill: none; }
+      .stage-num { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 700; fill: #58a6ff; }
+      .node-header { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+    </style>
+
+    <!-- Gradients -->
+    <linearGradient id="grad-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1f6feb" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#161b22" stop-opacity="0.8"/>
+    </linearGradient>
+    <linearGradient id="grad-purple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8957e5" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#161b22" stop-opacity="0.8"/>
+    </linearGradient>
+    <linearGradient id="grad-green" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#238636" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#161b22" stop-opacity="0.8"/>
+    </linearGradient>
+    <linearGradient id="grad-orange" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d29922" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#161b22" stop-opacity="0.8"/>
+    </linearGradient>
+
+    <!-- Markers -->
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#58a6ff" />
+    </marker>
+    <marker id="arrowhead-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#3fb950" />
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="320" rx="14" class="bg" stroke="#30363d" stroke-width="1.5"/>
+
+  <!-- Top Banner Title -->
+  <text x="30" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#f0f6fc">
+    AIOps Incident Commander &amp; Self-Healing Pipeline
+  </text>
+  <text x="30" y="58" class="subtitle">
+    End-to-end incident lifecycle from webhook trigger to automated self-healing
+  </text>
+
+  <!-- Flow Line Connecting Stages -->
+  <line x1="190" y1="175" x2="230" y2="175" class="arrow-solid" marker-end="url(#arrowhead)"/>
+  <line x1="390" y1="175" x2="430" y2="175" class="arrow-solid" marker-end="url(#arrowhead)"/>
+  <line x1="610" y1="175" x2="650" y2="175" class="arrow-solid" marker-end="url(#arrowhead)"/>
+  <line x1="830" y1="175" x2="870" y2="175" class="arrow-solid" marker-end="url(#arrowhead-green)"/>
+
+  <!-- CARD 1: Alert Sources -->
+  <g transform="translate(30, 85)">
+    <rect width="160" height="180" class="card" fill="url(#grad-blue)"/>
+    <rect x="12" y="14" width="48" height="18" rx="4" fill="#388bfd" fill-opacity="0.2"/>
+    <text x="36" y="27" class="tag" fill="#58a6ff">STEP 1</text>
+    <text x="12" y="58" class="node-header" fill="#58a6ff">MONITORING</text>
+    <text x="12" y="80" class="title">Alert Sources</text>
+    <text x="12" y="105" class="subtitle">Zabbix Webhooks</text>
+    <text x="12" y="125" class="subtitle">Prometheus Alerts</text>
+    <text x="12" y="145" class="subtitle">Datadog / Generic</text>
+    <rect x="12" y="156" width="136" height="1" fill="#30363d"/>
+    <text x="12" y="171" font-size="10" fill="#7d8590" font-family="sans-serif">HTTP POST /alert</text>
+  </g>
+
+  <!-- CARD 2: API Gateway -->
+  <g transform="translate(230, 85)">
+    <rect width="160" height="180" class="card" fill="url(#grad-blue)"/>
+    <rect x="12" y="14" width="48" height="18" rx="4" fill="#388bfd" fill-opacity="0.2"/>
+    <text x="36" y="27" class="tag" fill="#58a6ff">STEP 2</text>
+    <text x="12" y="58" class="node-header" fill="#58a6ff">INGESTION</text>
+    <text x="12" y="80" class="title">FastAPI Gateway</text>
+    <text x="12" y="105" class="subtitle">Pydantic v2 Schema</text>
+    <text x="12" y="125" class="subtitle">UUID Assignment</text>
+    <text x="12" y="145" class="subtitle">Fast Async Ingest</text>
+    <rect x="12" y="156" width="136" height="1" fill="#30363d"/>
+    <text x="12" y="171" font-size="10" fill="#7d8590" font-family="sans-serif">Status: 202 Accepted</text>
+  </g>
+
+  <!-- CARD 3: Multi-Agent Pipeline -->
+  <g transform="translate(430, 85)">
+    <rect width="180" height="180" class="card" stroke="#8957e5" stroke-width="1.5" fill="url(#grad-purple)"/>
+    <rect x="12" y="14" width="48" height="18" rx="4" fill="#8957e5" fill-opacity="0.25"/>
+    <text x="36" y="27" class="tag" fill="#bc8cff">STEP 3</text>
+    <text x="12" y="58" class="node-header" fill="#bc8cff">AI ENGINE</text>
+    <text x="12" y="80" class="title">LangGraph Agents</text>
+    <text x="12" y="105" class="subtitle">Agent 1: RCA Analyzer</text>
+    <text x="12" y="125" class="subtitle">Agent 2: Remediation</text>
+    <text x="12" y="145" class="subtitle">Agent 3: Gatekeeper</text>
+    <rect x="12" y="156" width="156" height="1" fill="#30363d"/>
+    <text x="12" y="171" font-size="10" fill="#d2a8ff" font-family="sans-serif">Groq LLM + ChromaDB</text>
+  </g>
+
+  <!-- CARD 4: Telegram HITL -->
+  <g transform="translate(650, 85)">
+    <rect width="180" height="180" class="card" stroke="#d29922" stroke-width="1.5" fill="url(#grad-orange)"/>
+    <rect x="12" y="14" width="48" height="18" rx="4" fill="#d29922" fill-opacity="0.25"/>
+    <text x="36" y="27" class="tag" fill="#e3b341">STEP 4</text>
+    <text x="12" y="58" class="node-header" fill="#e3b341">HUMAN-IN-THE-LOOP</text>
+    <text x="12" y="80" class="title">Telegram HITL Bot</text>
+    <text x="12" y="105" class="subtitle">Interactive Card</text>
+    <text x="12" y="125" class="subtitle">[Approve Execution]</text>
+    <text x="12" y="145" class="subtitle">[Reject Incident]</text>
+    <rect x="12" y="156" width="156" height="1" fill="#30363d"/>
+    <text x="12" y="171" font-size="10" fill="#e3b341" font-family="sans-serif">On-Call Engineer Review</text>
+  </g>
+
+  <!-- CARD 5: Execution & Remediation -->
+  <g transform="translate(870, 85)">
+    <rect width="200" height="180" class="card" stroke="#238636" stroke-width="1.5" fill="url(#grad-green)"/>
+    <rect x="12" y="14" width="48" height="18" rx="4" fill="#238636" fill-opacity="0.25"/>
+    <text x="36" y="27" class="tag" fill="#3fb950">STEP 5</text>
+    <text x="12" y="58" class="node-header" fill="#3fb950">CLOSED-LOOP FIX</text>
+    <text x="12" y="80" class="title">Executor Engine</text>
+    <text x="12" y="105" class="subtitle">Ansible / Bash Runner</text>
+    <text x="12" y="125" class="subtitle">DRY_RUN or Live Run</text>
+    <text x="12" y="145" class="subtitle">In-Place Telegram Log</text>
+    <rect x="12" y="176" width="176" height="1" fill="#30363d"/>
+    <text x="12" y="171" font-size="10" fill="#3fb950" font-family="sans-serif">Status: RESOLVED</text>
+  </g>
+</svg>

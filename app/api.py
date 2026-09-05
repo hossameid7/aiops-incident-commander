@@ -23,6 +23,8 @@ from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.agents import run_pipeline
+from app.bot import send_approval_request
 from app.models import AlertPayload, IncidentState, IncidentStatus
 from app.rag import get_collection_stats
 from config import get_settings, configure_logging
@@ -183,9 +185,6 @@ async def ingest_alert(payload: AlertPayload) -> dict:
 
     Returns an acknowledgement with the incident ID for tracking.
     """
-    from app.agents import run_pipeline
-    from app.bot import send_approval_request
-
     incident_id = str(uuid.uuid4())
     logger.info(
         "Incident %s | Alert received | Server: %s | Metric: %s | Severity: %s",

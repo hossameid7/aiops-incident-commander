@@ -14,59 +14,17 @@ All inter-component data contracts are enforced by Pydantic v2 schemas with fiel
 
 ## Architecture Overview
 
+![AIOps Incident Commander Architecture](Screenshots/architecture_overview.svg)
+
+```mermaid
+flowchart LR
+    A["📡 Alert Sources<br/><code>Zabbix / Prometheus</code>"] --> B["⚡ FastAPI Gateway<br/><code>Pydantic v2</code>"]
+    B --> C["🔍 Agent 1: RCA<br/><code>Groq + ChromaDB</code>"]
+    C --> D["🛠️ Agent 2: Planner<br/><code>Ansible / Bash</code>"]
+    D --> E["📱 Telegram HITL<br/><code>Operator Approval</code>"]
+    E -->|Approved| F["🚀 Self-Healing<br/><code>Automated Execution</code>"]
 ```
-External Monitoring System (Zabbix / Prometheus)
-         |
-         | HTTP POST /api/v1/alert
-         v
-+------------------------------------------+
-|          FastAPI Webhook Gateway          |
-|  (app/api.py -- Pydantic v2 validation)  |
-+------------------------------------------+
-         |
-         | AlertPayload (validated)
-         v
-+------------------------------------------+
-|        LangGraph Multi-Agent Pipeline     |
-|  (app/agents.py)                         |
-|                                          |
-|  +------------+                          |
-|  |  Agent 1   |  Root Cause Analyzer     |
-|  | (ChatGroq) |  + ChromaDB RAG query   |
-|  +------------+                          |
-|        |  RCAAnalysis                    |
-|        v                                 |
-|  +------------+                          |
-|  |  Agent 2   |  Remediation Planner     |
-|  | (ChatGroq) |  Ansible/Bash command    |
-|  +------------+                          |
-|        |  RemediationPlan                |
-|        v                                 |
-|  +------------+                          |
-|  |  Agent 3   |  Gatekeeper & Validator  |
-|  |            |  Formats HITL message    |
-|  +------------+                          |
-+------------------------------------------+
-         |
-         | Approval message + Inline keyboard
-         v
-+------------------------------------------+
-|       Telegram HITL Bot (app/bot.py)      |
-|  [Approve Execution]  [Reject]           |
-+------------------------------------------+
-         |
-         | On approval button press
-         v
-+------------------------------------------+
-|     Executor (app/executor.py)            |
-|  Ansible playbook / Bash command          |
-|  DRY_RUN simulation or live execution     |
-+------------------------------------------+
-         |
-         | Execution log (edited into Telegram message)
-         v
-         Operator on-call
-```
+
 
 **Supporting components:**
 
@@ -436,6 +394,7 @@ aiops-incident-commander/
 ├── tests/
 │   └── test_pipeline.py        # Unit and integration test suite
 └── Screenshots/
+    ├── architecture_overview.svg
     ├── 01_telegram_bot_start.png
     ├── 02_swagger_alert_request.png
     ├── 03_telegram_approval_message.png
